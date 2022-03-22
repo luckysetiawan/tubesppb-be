@@ -1,6 +1,8 @@
 package main
 
-import "tubesppb-be/app"
+import (
+	"tubesppb-be/app"
+)
 
 func main() {
 	app.StartApplication()
