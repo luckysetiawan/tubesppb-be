@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	AuthenticationRepository "tubesppb-be/modules/authentication/repository"
-	User "tubesppb-be/modules/users/data"
+	User "tubesppb-be/modules/user/data"
 	Response "tubesppb-be/response"
 )
 
