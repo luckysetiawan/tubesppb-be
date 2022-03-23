@@ -13,19 +13,19 @@ var jwtKey = []byte(config.LoadConfig("JWT_KEY"))
 var tokenName = "token"
 
 type Claims struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	UserType int    `json:"user_type"`
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	FriendMode bool   `json:"user_type"`
 	jwt.StandardClaims
 }
 
-func generateToken(c *gin.Context, id int, name string, userType int) {
+func generateToken(c *gin.Context, id int, name string, fridendMode bool) {
 	tokenExpiryTime := time.Now().Add(5 * time.Minute)
 
 	claims := &Claims{
-		ID:       id,
-		Name:     name,
-		UserType: userType,
+		ID:         id,
+		Name:       name,
+		FriendMode: fridendMode,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: tokenExpiryTime.Unix(),
 		},
@@ -44,9 +44,9 @@ func resetUserToken(c *gin.Context) {
 	c.SetCookie(tokenName, "", -1, "/", "localhost", false, true)
 }
 
-func Authenticate(accessType int) gin.HandlerFunc {
+func Authenticate(friendMode bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		isValidToken := validateUserToken(c, accessType)
+		isValidToken := validateUserToken(c, friendMode)
 		if !isValidToken {
 			// var response UserResponse
 			// response.Message = "Unauthorized Access"
@@ -59,12 +59,12 @@ func Authenticate(accessType int) gin.HandlerFunc {
 	}
 }
 
-func validateUserToken(c *gin.Context, accessType int) bool {
+func validateUserToken(c *gin.Context, friendMode bool) bool {
 	isAccessTokenValid, id, email, userType := validateTokenFromCookies(c)
-	fmt.Print(id, email, userType, accessType, isAccessTokenValid)
+	fmt.Print(id, email, userType, friendMode, isAccessTokenValid)
 
 	if isAccessTokenValid {
-		isUserValid := userType == accessType
+		isUserValid := userType == friendMode
 		fmt.Print(isUserValid)
 		if isUserValid {
 			return true
@@ -73,7 +73,7 @@ func validateUserToken(c *gin.Context, accessType int) bool {
 	return false
 }
 
-func validateTokenFromCookies(c *gin.Context) (bool, int, string, int) {
+func validateTokenFromCookies(c *gin.Context) (bool, int, string, bool) {
 	if cookie, err := c.Cookie(tokenName); err == nil {
 		accessToken := cookie
 		accessClaims := &Claims{}
@@ -81,8 +81,8 @@ func validateTokenFromCookies(c *gin.Context) (bool, int, string, int) {
 			return jwtKey, nil
 		})
 		if err == nil && parsedToken.Valid {
-			return true, accessClaims.ID, accessClaims.Name, accessClaims.UserType
+			return true, accessClaims.ID, accessClaims.Name, accessClaims.FriendMode
 		}
 	}
-	return false, -1, "", -1
+	return false, -1, "", false
 }
