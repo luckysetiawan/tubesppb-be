@@ -17,3 +17,13 @@ go get
 ```
 go run main.go
 ```
+
+## Deploy to Heroku
+Add heroku on git
+```
+heroku git:remote -a Masimelrowoo
+```
+Push changes made to heroku
+```
+git push heroku master
+```
